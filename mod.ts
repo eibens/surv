@@ -1,3 +1,4 @@
+export { join } from "https://deno.land/std@0.100.0/path/mod.ts";
 export * from "./src/bundle.ts";
 export * from "./src/debounce.ts";
 export * from "./src/deployctl.ts";

@@ -1,7 +1,9 @@
-export const renderHtml = (options: {
+export type HtmlOptions = {
   title?: string;
   body?: string;
-}) =>
+};
+
+export const html = (options: HtmlOptions) =>
   `<!DOCTYPE html>
 <html lang="en">
   <head>

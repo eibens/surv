@@ -62,9 +62,21 @@ export function serveWs(options: ServeWsOptions) {
               }
             }
           } catch (error) {
-            // NOTE: Use same strategy as Deno std.
-            // https://deno.land/std@0.95.0/http/server.ts#L131
-            if (!(error instanceof Deno.errors.BadResource)) {
+            const errors = [
+              // NOTE: Use same strategy as Deno std.
+              // https://deno.land/std@0.95.0/http/server.ts#L131
+              Deno.errors.BadResource,
+              // NOTE: Happens if socket has already been closed.
+              Deno.errors.ConnectionReset,
+            ];
+
+            // Check whether error is a known type that we want to ignore.
+            const ignore = errors.reduce(
+              (a, type) => a || error instanceof type,
+              false,
+            );
+
+            if (!ignore) {
               throw error;
             }
           }
