@@ -2,11 +2,13 @@
 import {
   broadcast,
   bundle,
+  debounce,
   deployctl,
   glob,
-  kind,
   renderHtml,
   rule,
+  run,
+  sequence,
   watch,
 } from "../mod.ts";
 
@@ -46,11 +48,18 @@ watch(
   }),
 );
 
-// Bundle the main script file when TypeScript files change.
+// Bundle the main script file and format code
+// when TypeScript files change.
 watch(
   ".",
   rule(
     glob("**/*.ts"),
-    bundle("index.ts", "docs/index.js"),
+    debounce(
+      sequence(
+        bundle("index.ts", "docs/index.js"),
+        run({ cmd: ["deno", "fmt"] }),
+      ),
+      1000,
+    ),
   ),
 );

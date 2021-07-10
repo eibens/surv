@@ -11,7 +11,7 @@ type Kind = Deno.FsEvent["kind"];
  */
 export function watch(
   paths: string | string[],
-  handle: (event: Deno.FsEvent) => Promise<void>,
+  handle: (event: Deno.FsEvent) => void | Promise<void>,
 ): Deno.Closer {
   handle({
     kind: "any",
