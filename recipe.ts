@@ -8,8 +8,6 @@ import {
   HtmlOptions,
   join,
   rule,
-  run,
-  sequence,
   serveFileHandler,
   watch,
 } from "./mod.ts";
@@ -86,6 +84,7 @@ export function serveFiles(options: {
   // @ts-ignore This only works in a web-worker or Deno Deploy runtime.
   addEventListener(
     "fetch",
+    // @ts-ignore Needs to be ignored too for some reason.
     serveFileHandler(options),
   );
 }
