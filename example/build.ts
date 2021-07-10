@@ -40,7 +40,7 @@ deployctl("serve.js")();
 //  ),
 //);
 
-// Send a message to websocket clients files if `docs` change.
+// Send a message to websocket clients if `docs` change.
 watch(
   "docs",
   broadcast({
