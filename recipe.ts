@@ -68,10 +68,7 @@ export async function serveSinglePage(options: ServeSinglePageOptions) {
     rule(
       glob("**/*.ts"),
       debounce(
-        sequence(
-          bundle("index.ts", "docs/index.js"),
-          run({ cmd: ["deno", "fmt"] }),
-        ),
+        bundle("index.ts", "docs/index.js"),
         1000,
       ),
     ),
@@ -86,9 +83,9 @@ export async function serveSinglePage(options: ServeSinglePageOptions) {
 export function serveFiles(options: {
   root?: string;
 } = {}) {
+  // @ts-ignore This only works in a web-worker or Deno Deploy runtime.
   addEventListener(
     "fetch",
-    // @ts-ignore This only works in a web-worker or Deno Deploy runtime.
     serveFileHandler(options),
   );
 }
