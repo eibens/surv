@@ -3,7 +3,11 @@ import { blue, underline } from "https://deno.land/std@0.101.0/fmt/colors.ts";
 import { createLogger, Logger } from "./logger.ts";
 
 if (import.meta.main) {
-  await cli();
+  await cli({
+    build: [{
+      cmd: ["deno", "run", "-A", "https://deno.land/x/edcb@v0.5.1/cli.ts"],
+    }],
+  });
 }
 
 export type CliOptions = surv.Options & {
@@ -45,7 +49,7 @@ function printHelp(options: CliOptions) {
   log(options.help);
 }
 
-async function printInvalidArgs(options: CliOptions) {
+function printInvalidArgs(options: CliOptions) {
   const { error, debug } = options.logger;
   error("error");
   error("invalid arguments: " + options.args.join(" "));

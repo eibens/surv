@@ -18,7 +18,7 @@ export type LoggerTag =
   | "warn"
   | "error"
   | "start"
-  | "debug"
+  | "debug";
 
 export type Logger = Record<LoggerTag, (msg: string) => void>;
 
@@ -39,6 +39,6 @@ export function createLogger(options: LoggerOptions): Logger {
     error: logger(console.log, red),
     warn: logger(console.log, yellow),
     start: logger(console.info, magenta),
-    debug: logger(console.debug, gray)
+    debug: logger(console.debug, gray),
   };
 }

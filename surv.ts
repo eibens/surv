@@ -14,7 +14,7 @@ export type Options = {
 export async function startServer(options: {
   server: string;
 }) {
-  surv.run({
+  await surv.run({
     cmd: [
       "deployctl",
       "run",
@@ -30,6 +30,7 @@ export async function startReloader(options: {
   wsHostname: string;
   wsPort: number;
 }) {
+  await Deno.mkdir(options.docs, { recursive: true });
   return surv.watch(
     options.docs,
     surv.broadcast({
@@ -39,7 +40,7 @@ export async function startReloader(options: {
   );
 }
 
-export async function startBundler(options: {
+export function startBundler(options: {
   docs: string;
   pages: Record<string, string>;
   modules: Record<string, string>;
@@ -75,10 +76,12 @@ export async function runPageBundler(options: {
   docs: string;
   pages: Record<string, string>;
 }) {
-  // Ensure the output dir exists.
-  await Deno.mkdir(options.docs, { recursive: true });
-
-  for (const name of Object.keys(options.pages)) {
+  const keys = Object.keys(options.pages);
+  if (keys.length) {
+    // Ensure the output dir exists.
+    await Deno.mkdir(options.docs, { recursive: true });
+  }
+  for (const name of keys) {
     verifyFileName(name);
     const htmlFile = surv.join(options.docs, `${name}.html`);
     await Deno.writeTextFile(htmlFile, options.pages[name]);
@@ -89,10 +92,12 @@ export async function runModuleBundler(options: {
   docs: string;
   modules: Record<string, string>;
 }) {
-  // Ensure the output dir exists.
-  await Deno.mkdir(options.docs, { recursive: true });
-
-  for (const name of Object.keys(options.modules)) {
+  const keys = Object.keys(options.modules);
+  if (keys.length) {
+    // Ensure the output dir exists.
+    await Deno.mkdir(options.docs, { recursive: true });
+  }
+  for (const name of keys) {
     verifyFileName(name);
     const tsFile = options.modules[name];
     const jsFile = surv.join(options.docs, `${name}.js`);
