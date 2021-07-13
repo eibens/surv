@@ -37,50 +37,36 @@ export function serveWs(options: ServeWsOptions) {
   (async () => {
     for await (const request of listener) {
       (async () => {
+        // Use this slightly inconvenient native API to upgrade the connection.
+        const { conn, r: bufReader, w: bufWriter, headers } = request;
+        const ws = await acceptWebSocket({
+          conn,
+          bufReader,
+          bufWriter,
+          headers,
+        });
+
+        // Add new connection.
+        sockets.add(ws);
+        handler.connect(ws);
+
+        // Wait for close event.
+        // NOTE: For now we ignore all other events.
         try {
-          // Use this slightly inconvenient native API to upgrade the connection.
-          const { conn, r: bufReader, w: bufWriter, headers } = request;
-          const ws = await acceptWebSocket({
-            conn,
-            bufReader,
-            bufWriter,
-            headers,
-          });
-
-          // Add new connection.
-          sockets.add(ws);
-          handler.connect(ws);
-
-          // Wait for close event.
-          // NOTE: For now we ignore all other events.
-          try {
-            for await (const event of ws) {
-              try {
-                if (isWebSocketCloseEvent(event)) {
-                  sockets.delete(ws);
-                  handler.disconnect(ws);
-                  break;
-                }
-              } catch (error) {
-                if (error instanceof Deno.errors.ConnectionReset) {
-                  // NOTE: Happens if socket has already been closed.
-                } else {
-                  throw error;
-                }
-              }
-            }
-          } catch (error) {
-            if (error instanceof Deno.errors.ConnectionReset) {
-              // NOTE: Happens if socket has already been closed.
-            } else if (error instanceof Deno.errors.BadResource) {
-              // NOTE: Use same strategy as Deno std.
-              // https://deno.land/std@0.95.0/http/server.ts#L131
-            } else {
-              throw error;
+          for await (const event of ws) {
+            if (isWebSocketCloseEvent(event)) {
+              sockets.delete(ws);
+              handler.disconnect(ws);
+              break;
             }
           }
         } catch (error) {
-          handler.error(error);
+          if (error instanceof Deno.errors.BadResource) {
+            // NOTE: Use same strategy as Deno std.
+            // https://deno.land/std@0.95.0/http/server.ts#L131
+          } else {
+            throw error;
+          }
         }
       })();
     }
@@ -107,7 +93,9 @@ export function serveWs(options: ServeWsOptions) {
     send: (data: unknown = "") => {
       assertNotClosed();
       sockets.forEach((ws) => {
-        ws.send(String(data));
+        if (!ws.isClosed) {
+          ws.send(String(data));
+        }
       });
       return Promise.resolve();
     },

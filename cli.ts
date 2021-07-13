@@ -1,5 +1,9 @@
 import * as surv from "./mod.ts";
-import { blue, underline } from "https://deno.land/std@0.101.0/fmt/colors.ts";
+import {
+  blue,
+  bold,
+  underline,
+} from "https://deno.land/std@0.101.0/fmt/colors.ts";
 import { createLogger, Logger } from "./logger.ts";
 
 if (import.meta.main) {
@@ -80,11 +84,18 @@ function startServer(options: CliOptions) {
 }
 
 function startReloader(options: CliOptions) {
-  const { start, info } = options.logger;
+  const { start, info, error } = options.logger;
   start(`reloader started`);
   const wsUrl = `ws://${options.wsHostname}:${options.wsPort}`;
   info(`reloader: ${blue(underline(wsUrl))}`);
-  surv.startReloader(options);
+  surv.startReloader({
+    ...options,
+    handler: {
+      connect: () => start(`websocket connected`),
+      disconnect: () => start(`websocket disconnected`),
+      error: (e) => error(`${bold(e.name)}: ${e.message}`),
+    },
+  });
 }
 
 function startBundler(options: CliOptions) {

@@ -29,14 +29,19 @@ export async function startReloader(options: {
   docs: string;
   wsHostname: string;
   wsPort: number;
+  handler: surv.ServeWsHandler;
 }) {
   await Deno.mkdir(options.docs, { recursive: true });
   return surv.watch(
     options.docs,
-    surv.broadcast({
-      hostname: options.wsHostname,
-      port: options.wsPort,
-    }),
+    surv.debounce(
+      surv.broadcast({
+        hostname: options.wsHostname,
+        port: options.wsPort,
+        handler: options.handler,
+      }),
+      200,
+    ),
   );
 }
 
@@ -54,7 +59,7 @@ export function startBundler(options: {
           await runModuleBundler(options);
           await runPageBundler(options);
         },
-        1000,
+        500,
       ),
     ),
   );
