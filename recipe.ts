@@ -12,15 +12,20 @@ import {
   watch,
 } from "./mod.ts";
 
-export type ServeSinglePageOptions = {
-  dist?: string;
+export type SinglePageOptions = {
+  docs?: string;
   html: HtmlOptions;
-  server: string;
+};
+
+export type ServeSinglePageOptions = SinglePageOptions & {
+  deploy?: string;
   ws: {
     port: number;
     hostname?: string;
   };
 };
+
+export type BuildSinglePageOptions = SinglePageOptions & {};
 
 /**
  * Starts a server for developing a single page application.
@@ -28,20 +33,11 @@ export type ServeSinglePageOptions = {
  * @param options are the options for the server.
  */
 export async function serveSinglePage(options: ServeSinglePageOptions) {
-  const dist = options.dist || "docs";
-
-  // Ensure the output dir exists.
-  await Deno.mkdir(dist, { recursive: true });
-
-  // Generate the main HTML file once.
-  await Deno.writeTextFile(
-    join(dist, "index.html"),
-    html(options.html),
-  );
-
-  // Start the HTTP server.
-  // NOTE: This should be replaced, once process restarting is fixed.
-  deployctl(options.server)();
+  if (options.deploy) {
+    // Start the HTTP server.
+    // NOTE: This should be replaced, once process restarting is fixed.
+    deployctl(options.deploy)();
+  }
 
   // Restart the HTTP server whenever server.js changes.
   // FIXME: Server is restarted before it is closed.
@@ -57,7 +53,8 @@ export async function serveSinglePage(options: ServeSinglePageOptions) {
   //);
 
   // Send a message to websocket clients if output files change.
-  watch(dist, broadcast(options.ws));
+  const docs = options.docs || "docs";
+  watch(docs, broadcast(options.ws));
 
   // Bundle the main script file and format code
   // when TypeScript files change.
@@ -85,6 +82,6 @@ export function serveFiles(options: {
   addEventListener(
     "fetch",
     // @ts-ignore Needs to be ignored too for some reason.
-    serveFileHandler(options),
+    serveFileHandler({ root: options.root || "docs" }),
   );
 }

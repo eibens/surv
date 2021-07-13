@@ -24,7 +24,6 @@ export function watch(
 
   (async () => {
     for await (const event of watcher) {
-      console.log(`${event.kind}: ${event.paths.join(", ")}`);
       await handle(event);
     }
   })();

@@ -55,28 +55,27 @@ export function serveWs(options: ServeWsOptions) {
           // NOTE: For now we ignore all other events.
           try {
             for await (const event of ws) {
-              if (isWebSocketCloseEvent(event)) {
-                sockets.delete(ws);
-                handler.disconnect(ws);
-                break;
+              try {
+                if (isWebSocketCloseEvent(event)) {
+                  sockets.delete(ws);
+                  handler.disconnect(ws);
+                  break;
+                }
+              } catch (error) {
+                if (error instanceof Deno.errors.ConnectionReset) {
+                  // NOTE: Happens if socket has already been closed.
+                } else {
+                  throw error;
+                }
               }
             }
           } catch (error) {
-            const errors = [
+            if (error instanceof Deno.errors.ConnectionReset) {
+              // NOTE: Happens if socket has already been closed.
+            } else if (error instanceof Deno.errors.BadResource) {
               // NOTE: Use same strategy as Deno std.
               // https://deno.land/std@0.95.0/http/server.ts#L131
-              Deno.errors.BadResource,
-              // NOTE: Happens if socket has already been closed.
-              Deno.errors.ConnectionReset,
-            ];
-
-            // Check whether error is a known type that we want to ignore.
-            const ignore = errors.reduce(
-              (a, type) => a || error instanceof type,
-              false,
-            );
-
-            if (!ignore) {
+            } else {
               throw error;
             }
           }
