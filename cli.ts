@@ -35,9 +35,9 @@ export async function cli(opts: Partial<CliOptions> = {}) {
   } else if (args[0] === "watch") {
     await runPageBundler(options);
     await runModuleBundler(options);
-    startServer(options);
     startBundler(options);
     startReloader(options);
+    startServer(options);
     options.logger.debug("-".repeat(32));
   } else if (!args.length) {
     await runPageBundler(options);
