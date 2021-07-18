@@ -2,7 +2,6 @@ export function run(options: Deno.RunOptions) {
   return async () => {
     const p = Deno.run(options);
     try {
-      console.log(`run: ${options.cmd.join(" ")}`);
       await p.status();
     } finally {
       closeProcess(p);
@@ -16,7 +15,6 @@ export function start(options: Deno.RunOptions) {
     if (process) closeProcess(process);
     process = Deno.run(options);
     try {
-      console.log(`restart: ${options.cmd.join(" ")}`);
       process.status();
     } catch (error) {
       console.error(error);
