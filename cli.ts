@@ -35,7 +35,7 @@ export async function cli(opts: Partial<CliOptions> = {}) {
   } else if (args[0] === "watch") {
     await runPageBundler(options);
     await runModuleBundler(options);
-    startBundler(options);
+    startPageBundler(options);
     startReloader(options);
     startServer(options);
     options.logger.debug("-".repeat(32));
@@ -61,33 +61,33 @@ function printInvalidArgs(options: CliOptions) {
 }
 
 function startServer(options: CliOptions) {
-  const { warn, debug, start, info } = options.logger;
+  const { warn, debug, start } = options.logger;
   if (Object.keys(options.pages).length === 0) {
-    warn("no pages are specified");
+    warn("no pages specified");
     debug("use `pages` option");
   }
   if (Object.keys(options.modules).length === 0) {
-    debug("no modules are specified");
+    warn("no modules specified");
     debug("use `modules` option");
   }
   const httpUrl = `http://localhost:8080`;
   if (options.server) {
     start(`server started`);
-    info(`server: ${blue(underline(httpUrl))}`);
+    debug(`server: ${blue(underline(httpUrl))}`);
     surv.startServer({
       server: options.server,
     });
   } else {
-    warn(`server not specified`);
+    warn(`no server specified`);
     debug("use `server` option");
   }
 }
 
 function startReloader(options: CliOptions) {
-  const { start, info, error } = options.logger;
+  const { start, error, debug } = options.logger;
   start(`reloader started`);
   const wsUrl = `ws://${options.wsHostname}:${options.wsPort}`;
-  info(`reloader: ${blue(underline(wsUrl))}`);
+  debug(`reloader: ${blue(underline(wsUrl))}`);
   surv.startReloader({
     ...options,
     handler: {
@@ -98,25 +98,25 @@ function startReloader(options: CliOptions) {
   });
 }
 
-function startBundler(options: CliOptions) {
-  const { start, info } = options.logger;
-  start("bundler started");
+function startPageBundler(options: CliOptions) {
+  const { start, debug } = options.logger;
+  start("page bundler started");
   surv.startBundler(options);
-  info(`${Object.keys(options.pages).length} page(s) watched`);
+  debug(`${Object.keys(options.pages).length} page(s) watched`);
 }
 
 async function runPageBundler(options: CliOptions) {
-  const { start, success } = options.logger;
-  start("bundler started");
+  const { start, debug } = options.logger;
+  start("page bundler started");
   await surv.runPageBundler(options);
-  success(`${Object.keys(options.pages).length} page(s) bundled`);
+  debug(`${Object.keys(options.pages).length} page(s) bundled`);
 }
 
 async function runModuleBundler(options: CliOptions) {
-  const { start, success } = options.logger;
+  const { start, debug } = options.logger;
   start("bundler started");
   await surv.runModuleBundler(options);
-  success(`${Object.keys(options.modules).length} modules(s) bundled`);
+  debug(`${Object.keys(options.modules).length} modules(s) bundled`);
 }
 
 async function runBuild(options: CliOptions) {
