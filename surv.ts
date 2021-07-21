@@ -59,10 +59,7 @@ export function startBundler(options: {
         surv.glob("**/*.tsx"),
       ),
       surv.debounce(
-        async () => {
-          await runModuleBundler(options);
-          await runPageBundler(options);
-        },
+        () => runModuleBundler(options),
         500,
       ),
     ),
