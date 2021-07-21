@@ -53,7 +53,10 @@ export function startBundler(options: {
   return surv.watch(
     ".",
     surv.rule(
-      surv.glob("**/*.ts"),
+      surv.or(
+        surv.glob("**/*.ts"),
+        surv.glob("**/*.tsx"),
+      ),
       surv.debounce(
         async () => {
           await runModuleBundler(options);
