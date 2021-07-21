@@ -35,7 +35,7 @@ export async function cli(opts: Partial<CliOptions> = {}) {
   } else if (args[0] === "watch") {
     await runPageBundler(options);
     await runModuleBundler(options);
-    startPageBundler(options);
+    startBundler(options);
     startReloader(options);
     startServer(options);
     options.logger.debug("-".repeat(32));
@@ -98,11 +98,11 @@ function startReloader(options: CliOptions) {
   });
 }
 
-function startPageBundler(options: CliOptions) {
+function startBundler(options: CliOptions) {
   const { start, debug } = options.logger;
-  start("page bundler started");
+  start("bundler started");
   surv.startBundler(options);
-  debug(`${Object.keys(options.pages).length} page(s) watched`);
+  debug(`${Object.keys(options.pages).length} modules(s) watched`);
 }
 
 async function runPageBundler(options: CliOptions) {
@@ -114,7 +114,7 @@ async function runPageBundler(options: CliOptions) {
 
 async function runModuleBundler(options: CliOptions) {
   const { start, debug } = options.logger;
-  start("bundler started");
+  start("module bundler started");
   await surv.runModuleBundler(options);
   debug(`${Object.keys(options.modules).length} modules(s) bundled`);
 }
