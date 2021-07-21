@@ -9,6 +9,7 @@ export type Options = {
   help: string;
   server: string | null;
   modules: Record<string, string>;
+  tsconfig?: string;
 };
 
 export async function startServer(options: {
@@ -99,6 +100,7 @@ export async function runPageBundler(options: {
 export async function runModuleBundler(options: {
   docs: string;
   modules: Record<string, string>;
+  tsconfig?: string;
 }) {
   const keys = Object.keys(options.modules);
   if (keys.length) {
@@ -109,7 +111,7 @@ export async function runModuleBundler(options: {
     verifyFileName(name);
     const tsFile = options.modules[name];
     const jsFile = surv.join(options.docs, `${name}.js`);
-    await surv.bundle(tsFile, jsFile)();
+    await surv.bundle(tsFile, jsFile, options)();
   }
 }
 
